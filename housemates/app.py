@@ -1,4 +1,4 @@
-class Blueprint:
+class Housemates:
 
     @staticmethod
     def run():
