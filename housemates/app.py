@@ -21,7 +21,6 @@ class postCounter(object):
         self.num_posts += 1
 
 
-
 class Housemates(BaseHTTPRequestHandler):
 
     counter = postCounter()

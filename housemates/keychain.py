@@ -1,4 +1,5 @@
 # Standard Libraries
+import json
 import os
 
 class Keychain(object):
@@ -10,20 +11,23 @@ class Keychain(object):
 
         self._load_api_credentials()
 
-
     def _load_api_credentials(self):
-        """ Load Application Secrets from Environment
+        """ Load Application Credentials
 
         """
 
-        for var in ['SPLITWISE_CONSUMER_KEY', 'SPLITWISE_CONSUMER_SECRET']:
-            if var not in os.environ.keys():
-                raise RuntimeError("Mssing {} environment variable!".format(var))
+        # Get credentials directory
+        root = os.path.dirname(os.path.dirname(__file__))
+        creds_dir = root + "/.credentials"
 
-        self.credentials["splitwise"] = {
-            "key" : os.environ['SPLITWISE_CONSUMER_KEY'],
-            "secret" : os.environ['SPLITWISE_CONSUMER_SECRET'],
-        }
+        # Load all credentials
+        for fn in os.listdir(creds_dir):
+            app_name = fn.split(".")[0]
+            with open(creds_dir + "/" + fn, 'r') as file:
+
+                app_creds = json.load(file)
+            self.credentials[app_name] = app_creds
+
         return
 
     def add_secret(self, name, key):
@@ -49,6 +53,6 @@ class Keychain(object):
 
         """
 
-        app_key = self.credentials[app]["key"]
-        app_secret = self.credentials[app]["secret"]
+        app_key = self.credentials[app]["consumer_key"]
+        app_secret = self.credentials[app]["consumer_secret"]
         return app_key, app_secret
