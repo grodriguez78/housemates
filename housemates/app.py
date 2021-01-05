@@ -1,17 +1,15 @@
 from http.server import BaseHTTPRequestHandler
+import os
 import urllib
 from threading import Thread
 import time
-
+import json
 
 from splitwise import Splitwise
 
 host_name = "localhost"
 server_port = 6969
 
-CONSUMER_KEY = "Nv4qPOn67amh43oqVgl5DQOBaBAbL1QhZKPpG9au"
-CONSUMER_SECRET = "H6T11tOVJJxS3Sgjc66wLEeZVCH8701i2BaLwNAJ"
-AUTH_TIMEOUT_S = 30
 
 class postCounter(object):
 
@@ -26,15 +24,25 @@ class Keychain(object):
 
     def __init__(self):
         self.keys = {}
+        self.credentials = {}
+
+        self._load_api_credentials()
 
 
-    def get_secret(self, name):
+    def _load_api_credentials(self):
+        """ Load Application Secrets from Environment
 
-        secret = None
-        if name in self.keys.keys():
-            secret = self.keys[name]
+        """
 
-        return secret
+        for var in ['SPLITWISE_CONSUMER_KEY', 'SPLITWISE_CONSUMER_SECRET']:
+            if var not in os.environ.keys():
+                raise RuntimeError("Mssing {} environment variable!".format(var))
+
+        self.credentials["splitwise"] = {
+            "key" : os.environ['SPLITWISE_CONSUMER_KEY'],
+            "secret" : os.environ['SPLITWISE_CONSUMER_SECRET'],
+        }
+        return
 
     def add_secret(self, name, key):
 
@@ -46,77 +54,87 @@ class Keychain(object):
         self.keys[name] = key
         return
 
+    def get_secret(self, name):
+
+        secret = None
+        if name in self.keys.keys():
+            secret = self.keys[name]
+
+        return secret
+
+    def get_api_credentials(self, app):
+        """ Access the API credentials for a specific application
+
+        """
+
+        app_key = self.credentials[app]["key"]
+        app_secret = self.credentials[app]["secret"]
+        return app_key, app_secret
+
 
 
 class Housemates(BaseHTTPRequestHandler):
 
     counter = postCounter()
     keychain = Keychain()
-    sw_client = Splitwise(CONSUMER_KEY, CONSUMER_SECRET)
 
     homepage = "http://{}:{}".format(host_name, server_port)
 
-    def request_splitwise_auth(self, consumer_key, consumer_secret):
+    def request_splitwise_auth(self):
         """ Authorize this object with Splitwise
 
         """
 
-        # Begin authentication
-        #state = "splitwise"
-        url, state = self.sw_client.getOAuth2AuthorizeURL(self.homepage)
+        CONSUMER_KEY, CONSUMER_SECRET = self.keychain.get_api_credentials("splitwise")
+        sw_client = Splitwise(CONSUMER_KEY, CONSUMER_SECRET)
 
+        # Begin authentication workflow
+        url, state = sw_client.getOAuth2AuthorizeURL(self.homepage)
         print("Please authorize integration with Splitwise: {}".format(url))
 
         return
 
-        # Wait for authentication
-        t_start = time.time()
-        while (self.keychain.get_secret(state) is None):
-            time.sleep(1.0)
-
-            # Check for Timeout
-            t_elapsed = time.time() - t_start
-            if t_elapsed > AUTH_TIMEOUT_S:
-                raise TimeoutError("Splitwise authentication took more than {} s!".format(AUTH_TIMEOUT_S))
-
 
     def complete_splitwise_auth(self, state):
 
-        code = self.keychain.get_secret(state)
-        redirect_uri = self.homepage
+        # code = self.keychain.get_secret(state)
+        # redirect_uri = self.homepage
 
-        # Mock splitwise implementation
-        data = "client_id=%s&client_secret=%s&grant_type=authorization_code&code=%s&redirect_uri=%s" % (
-            CONSUMER_KEY, CONSUMER_SECRET, code, redirect_uri)
+        # # Mock splitwise implementation
+        # data = "client_id=%s&client_secret=%s&grant_type=authorization_code&code=%s&redirect_uri=%s" % (
+        #     CONSUMER_KEY, CONSUMER_SECRET, code, redirect_uri)
 
-        OAUTH_BASE_URL = "https://www.splitwise.com/"
-        OAUTH2_TOKEN_URL = OAUTH_BASE_URL + "oauth/" \
-                "token"
+        # OAUTH_BASE_URL = "https://www.splitwise.com/"
+        # OAUTH2_TOKEN_URL = OAUTH_BASE_URL + "oauth/" \
+        #         "token"
 
-        url = Splitwise.OAUTH2_TOKEN_URL
-        method = 'POST'
+        # url = Splitwise.OAUTH2_TOKEN_URL
+        # method = 'POST'
 
 
-        auth = None
-        from requests import Request, sessions
+        # auth = None
+        # from requests import Request, sessions
 
-        requestObj = Request(method=method, url=url, data=data, auth=auth, files=None)
+        # requestObj = Request(method=method, url=url, data=data, auth=auth, files=None)
 
-        prep_req = requestObj.prepare()
+        # prep_req = requestObj.prepare()
 
-        with sessions.Session() as session:
-            response = session.send(prep_req)
+        # with sessions.Session() as session:
+        #     response = session.send(prep_req)
 
-        import pdb; pdb.set_trace()
-
+        # Instantiate Splitwise client
+        CONSUMER_KEY, CONSUMER_SECRET = self.keychain.get_api_credentials("splitwise")
+        sw_client = Splitwise(CONSUMER_KEY, CONSUMER_SECRET)
 
         # Get access token
-        access_token = self.sw_client.getOAuth2AccessToken(self.keychain.get_secret(state), self.homepage)
-        self.sw_client.setOAuth2AccessToken(access_token)
+        access_token = sw_client.getOAuth2AccessToken(self.keychain.get_secret(state), self.homepage)
+        sw_client.setOAuth2AccessToken(access_token)
         print("Access Token: {}".format(access_token))
 
         # Verify Access
         import pdb; pdb.set_trace()
+
+        # Record access token
 
 
     def do_GET(self):
@@ -141,7 +159,7 @@ class Housemates(BaseHTTPRequestHandler):
             pass
 
         # Handle Authentication Calls
-        elif res.path.startswith("/authorization"):
+        elif res.path.startswith("/authentication"):
 
             # Redirect to homepage
             self.send_response(301)
@@ -155,19 +173,44 @@ class Housemates(BaseHTTPRequestHandler):
 
 
     def do_POST(self):
+        """ To run authentication, make a POST request to http://{homepage}/execute/authentication
 
-        length = int(self.headers['Content-Length'])
-        post_data = urllib.parse.parse_qs(self.rfile.read(length).decode('utf-8'))
-        print("Got Post!")
-        print(post_data)
+        """
+
 
         self.counter.num_posts += 1
 
-        self.request_splitwise_auth(CONSUMER_KEY, CONSUMER_SECRET)
-        #auth_thread = Thread(target = self.authorize_splitwise, args=(CONSUMER_KEY, CONSUMER_SECRET))
-        #auth_thread.start()
-        #auth_thread.join()
-        #print("Auth thread finished ... exiting")
+        # Check for commands
+        if self.path.startswith("/execute"):
+
+            self.send_response(200)
+
+            workflow = self.path.split("/")[-1]
+            self._run_workflow(workflow)
+
+        else:
+            self.send_response(400)
+
+        # # Check content type
+        # content_type = self.headers["Content-type"]
+        # if content_type != "json":
+        #     raise RuntimeError("Got Unsupported POST content type {}".format(content_type))
+
+        # length = int(self.headers['Content-Length'])
+        # post_data = json.loads(self.rfile.read(length).decode('utf-8'))
+
+
+    def _run_workflow(self, workflow):
+        """ Run prescripted workflows
+
+        """
+
+        # Run authentication workflows
+        if workflow == "authentication":
+            self.request_splitwise_auth()
+
+        return
+
 
 
 

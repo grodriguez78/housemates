@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 run:
-	@python -m $(MODULE)
+	@python3 -m $(MODULE)
 
 test:
 	@pytest
