@@ -8,6 +8,12 @@ from splitwise import Splitwise
 
 from .keychain import Keychain
 
+import pickle
+import os.path
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+
 host_name = "localhost"
 server_port = 6969
 
@@ -125,7 +131,6 @@ class Housemates(BaseHTTPRequestHandler):
 
         """
 
-
         self.counter.num_posts += 1
 
         # Check for commands
@@ -155,11 +160,48 @@ class Housemates(BaseHTTPRequestHandler):
 
         # Run authentication workflows
         if workflow == "authentication":
+            self.google_auth()
             self.request_splitwise_auth()
 
         return
 
+    def google_auth(self, scopes=['https://www.googleapis.com/auth/gmail.readonly']):
+        """ Authenticate Google API
 
+        """
+        import pdb; pdb.set_trace()
+        creds = None
+
+        # The file token.pickle stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first time.
+        if os.path.exists('.credentials/google_token.pickle'):
+            with open('.credentials/google_token.pickle', 'rb') as token:
+                creds = pickle.load(token)
+
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    '.credentials/google.json', scopes)
+                creds = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open('.credentials/google_token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
+
+
+        # Check that gmail client works
+        import pdb; pdb.set_trace()
+        gm_client = build('gmail', 'v1', credentials=creds)
+
+        # Get unread messages in the Bills/38 Mountview Court label
+        foo = gm_client.users().messages().list(userId='me', labelIds=['Label_8761640109747395119', 'UNREAD']).execute()
+
+
+        return
+
+## TODO: Gmail Handler to extract unread bills
 
 
 

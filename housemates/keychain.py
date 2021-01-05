@@ -21,7 +21,8 @@ class Keychain(object):
         creds_dir = root + "/.credentials"
 
         # Load all credentials
-        for fn in os.listdir(creds_dir):
+        creds_fns = list(filter(lambda fn: fn.endswith(".json"), os.listdir(creds_dir)))
+        for fn in creds_fns:
             app_name = fn.split(".")[0]
             with open(creds_dir + "/" + fn, 'r') as file:
 
