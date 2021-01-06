@@ -1,6 +1,7 @@
 # Module Libraries
 from .utils import emails
 
+
 class Bill():
 
     sender = None
@@ -15,7 +16,6 @@ class Bill():
 
     @classmethod
     def from_email(cls, email_data, **kwargs):
-
 
         # Get Sender Name
         sender = emails.get_sender(email_data, **kwargs)

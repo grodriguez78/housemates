@@ -21,6 +21,7 @@
 # ``invoke generate.installer``.
 
 # pylint: skip-file
+# flake8: noqa
 
 import os.path
 import pkgutil

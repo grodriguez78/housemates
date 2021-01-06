@@ -42,7 +42,6 @@ class Housemates(BaseHTTPRequestHandler):
         url, _ = sw_client.getOAuth2AuthorizeURL(self.homepage)
         print("Please authorize integration with Splitwise: {}".format(url))
 
-
     def complete_splitwise_auth(self, state):
 
         # code = self.keychain.get_secret(state)
@@ -58,7 +57,6 @@ class Housemates(BaseHTTPRequestHandler):
 
         # url = Splitwise.OAUTH2_TOKEN_URL
         # method = 'POST'
-
 
         # auth = None
         # from requests import Request, sessions
@@ -83,7 +81,6 @@ class Housemates(BaseHTTPRequestHandler):
         # import pdb; pdb.set_trace()
 
         # Record access token
-
 
     def do_GET(self):
 
@@ -119,7 +116,6 @@ class Housemates(BaseHTTPRequestHandler):
             self.keychain.add_secret(params['state'][0], params['code'][0])
             self.complete_splitwise_auth(params['state'][0])
 
-
     def do_POST(self):
         """ To run authentication, make a POST request to http://{homepage}/execute/{workflow}
 
@@ -150,11 +146,8 @@ class Housemates(BaseHTTPRequestHandler):
         # length = int(self.headers['Content-Length'])
         # post_data = json.loads(self.rfile.read(length).decode('utf-8'))
 
-
     def _run_workflow(self, workflow):
-        """ Run prescripted workflows
-
-        """
+        # Run prescripted workflows
 
         # Run authentication workflows
         if workflow == "authentication":

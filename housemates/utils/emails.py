@@ -27,16 +27,18 @@ def get_bill_cost(email_data):
 
     return cost
 
+
 def get_received_date(email_data):
     received_date = datetime.fromtimestamp(int(email_data['internalDate']) / 1000)
     return received_date
+
 
 def get_sender(email_data, aliases={}):
 
     sender_data = list(filter(lambda h: h['name'] == 'Return-Path', email_data['payload']['headers']))
     sender_domain = sender_data[0]['value'].split('.')[-2].split("@")[-1]
 
-    ## TODO: Improve alias handling to differentiate between Recology & SFPower (both use kubra)
+    # TODO: Improve alias handling to differentiate between Recology & SFPower (both use kubra)
     if sender_domain in aliases.keys():
         sender_name = aliases[sender_domain]
     else:

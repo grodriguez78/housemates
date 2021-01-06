@@ -9,10 +9,8 @@ server_port = 6969
 
 if __name__ == '__main__':
 
-
     web_server = HTTPServer((host_name, server_port), Housemates)
     print("Server started http://{}:{}".format(host_name, server_port))
-
 
     try:
         web_server.serve_forever()

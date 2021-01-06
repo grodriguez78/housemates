@@ -56,7 +56,6 @@ class GoogleHandler():
         for app, access in apps.items():
             scopes.append(scope_base.format(app=app, access=access))
 
-
         # If there are no (valid) credentials available, let the user log in.
         if not self.creds or not self.creds.valid:
             flow = InstalledAppFlow.from_client_secrets_file(self.secrets_path, scopes)
@@ -71,7 +70,6 @@ class GoogleHandler():
             self.clients[app] = build(app, self.api_versions[app], credentials=self.creds)
 
         return
-
 
     def scan_emails(self):
         """ Look for new bills in Gmail
@@ -91,7 +89,7 @@ class GoogleHandler():
 
         # Get Labe IDs used to denote unpaid Bills
         all_labels = client.users().labels().list(userId='me').execute()['labels']
-        bill_labels = list(filter(lambda l: l['name'] in self.config['filter_label_names'], all_labels))
+        bill_labels = list(filter(lambda label: label['name'] in self.config['filter_label_names'], all_labels))
         bill_labelids = [l['id'] for l in bill_labels]
 
         # Get Bill Messages
