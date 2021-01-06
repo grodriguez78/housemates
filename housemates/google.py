@@ -12,17 +12,16 @@ from google.auth.transport.requests import Request
 from .bills import Bill
 
 
-class GoogleHandler(object):
+class GoogleHandler():
 
     creds_path = ".credentials/google_token.pickle"
     secrets_path = ".credentials/google.json"
+    config_path = "configs/google_config.yaml"
     clients = {}
     api_versions = {
         'gmail': 'v1'
     }
     config = {}
-
-
 
     def __init__(self):
 
@@ -33,11 +32,8 @@ class GoogleHandler(object):
                 self.creds = pickle.load(token)
 
         # Load saved config
-        config_fn = os.path.dirname(os.path.dirname(__file__)) + "/configs/google_config.yaml"
-        with open(config_fn, 'r') as file:
+        with open(self.config_path, 'r') as file:
             self.config = yaml.load(file, Loader=yaml.FullLoader)
-
-        return
 
     def authenticate(self, apps):
         """ Authenticate with the Google API (if necessary)
@@ -67,7 +63,7 @@ class GoogleHandler(object):
             if self.creds and self.creds.expired and self.creds.refresh_token:
                 self.creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(secrets_path, scopes)
+                flow = InstalledAppFlow.from_client_secrets_file(self.secrets_path, scopes)
                 self.creds = flow.run_local_server(port=0)
 
             # Save the credentials for the next run

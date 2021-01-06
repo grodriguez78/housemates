@@ -1,11 +1,11 @@
+# Standard Libraries
 from http.server import BaseHTTPRequestHandler
 import urllib
-from threading import Thread
-import time
-import json
 
+# Third Party Libraries
 from splitwise import Splitwise
 
+# Module Libraries
 from .keychain import Keychain
 from .google import GoogleHandler
 
@@ -14,7 +14,7 @@ host_name = "localhost"
 server_port = 6969
 
 
-class PostCounter(object):
+class PostCounter():
 
     def __init__(self):
         self.num_posts = 0
@@ -40,10 +40,8 @@ class Housemates(BaseHTTPRequestHandler):
         sw_client = Splitwise(CONSUMER_KEY, CONSUMER_SECRET)
 
         # Begin authentication workflow
-        url, state = sw_client.getOAuth2AuthorizeURL(self.homepage)
+        url, _ = sw_client.getOAuth2AuthorizeURL(self.homepage)
         print("Please authorize integration with Splitwise: {}".format(url))
-
-        return
 
 
     def complete_splitwise_auth(self, state):
@@ -78,12 +76,12 @@ class Housemates(BaseHTTPRequestHandler):
         sw_client = Splitwise(CONSUMER_KEY, CONSUMER_SECRET)
 
         # Get access token
-        access_token = sw_client.getOAuth2AccessToken(self.keychain.get_secret(state), self.homepage)
+        access_token = sw_client.getOAuth2AccessToken(state, self.homepage)
         sw_client.setOAuth2AccessToken(access_token)
         print("Access Token: {}".format(access_token))
 
         # Verify Access
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         # Record access token
 
@@ -169,6 +167,3 @@ class Housemates(BaseHTTPRequestHandler):
             print("Found {} New Bills!".format(len(new_bills)))
             for i, bill in enumerate(new_bills):
                 print("Bill {}: ${} due to {}".format(i + 1, bill.total, bill.sender))
-
-        return
-

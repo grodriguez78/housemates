@@ -2,7 +2,7 @@
 import json
 import os
 
-class Keychain(object):
+class Keychain():
     # Store authentication secrets
 
     def __init__(self):
@@ -29,8 +29,6 @@ class Keychain(object):
                 app_creds = json.load(file)
             self.credentials[app_name] = app_creds
 
-        return
-
     def add_secret(self, name, key):
 
         # Check for existing keys
@@ -39,7 +37,6 @@ class Keychain(object):
 
         # Add key to keychain
         self.keys[name] = key
-        return
 
     def get_secret(self, name):
 

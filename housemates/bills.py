@@ -1,7 +1,7 @@
 # Module Libraries
 from .utils import emails
 
-class Bill(object):
+class Bill():
 
     sender = None
     total = None
@@ -12,7 +12,6 @@ class Bill(object):
         self.sender = sender
         self.total = total
         self.recieved_date = recieved_date
-        return
 
     @classmethod
     def from_email(cls, email_data, **kwargs):
@@ -35,4 +34,3 @@ class Bill(object):
 
     def __str__(self):
         return "Bill of ${} from {}".format(self.total, self.sender)
-
