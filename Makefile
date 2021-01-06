@@ -96,3 +96,7 @@ clean:
 
 docker-clean:
 	@docker system prune -f --filter "label=name=$(MODULE)"
+
+secrets:
+	@echo ${SPLITWISE_CREDENTIALS} | base64 --decode > ./.credentials/splitwise.json
+	@echo ${GOOGLE_CREDENTIALS} | base64 --decode > ./.credentials/google.json
