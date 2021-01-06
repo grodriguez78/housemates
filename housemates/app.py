@@ -9,7 +9,6 @@ from splitwise import Splitwise
 from .keychain import Keychain
 from .google import GoogleHandler
 
-
 host_name = "localhost"
 server_port = 6969
 

@@ -6,7 +6,6 @@ import yaml
 # Third Party Libraries
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
 
 # Module Libraries
 from .bills import Bill
@@ -60,11 +59,8 @@ class GoogleHandler():
 
         # If there are no (valid) credentials available, let the user log in.
         if not self.creds or not self.creds.valid:
-            if self.creds and self.creds.expired and self.creds.refresh_token:
-                self.creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(self.secrets_path, scopes)
-                self.creds = flow.run_local_server(port=0)
+            flow = InstalledAppFlow.from_client_secrets_file(self.secrets_path, scopes)
+            self.creds = flow.run_local_server(port=0)
 
             # Save the credentials for the next run
             with open(self.creds_path, 'wb') as token:
