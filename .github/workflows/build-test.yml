@@ -23,6 +23,9 @@ jobs:
         pip install -r requirements.txt
     - name: Generate Secrets
       run: make secrets
+      env:
+        GOOGLE_CREDENTIALS: ${{secrets.GOOGLE_CREDENTIALS}}
+        SPLITWISE_CREDENTIALS: ${{secrets.SPLITWISE_CREDENTIALS}}
     - name: Run Makefile test
       run: make test
     - name: Install Linters
