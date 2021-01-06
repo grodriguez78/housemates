@@ -9,6 +9,9 @@ jobs:
     - uses: actions/checkout@v1
     - name: Run Makefile build for Development
       run: make build-dev
+      env:
+        GOOGLE_CREDENTIALS: ${{secrets.GOOGLE_CREDENTIALS}}
+        SPLITWISE_CREDENTIALS: ${{secrets.SPLITWISE_CREDENTIALS}}
 
   test:
     runs-on: ubuntu-latest
