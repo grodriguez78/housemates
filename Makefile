@@ -41,6 +41,7 @@ build-dev:
 	@echo "\n${BLUE}Building Development image with labels:\n"
 	@echo "name: $(MODULE)"
 	@echo "version: $(TAG)${NC}\n"
+	make secrets
 	@sed                                 \
 	    -e 's|{NAME}|$(MODULE)|g'        \
 	    -e 's|{VERSION}|$(TAG)|g'        \
