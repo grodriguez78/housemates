@@ -35,7 +35,7 @@ class GoogleHandler(object):
         # Load saved config
         config_fn = os.path.dirname(os.path.dirname(__file__)) + "/configs/google_config.yaml"
         with open(config_fn, 'r') as file:
-            self.config = yaml.load(file)
+            self.config = yaml.load(file, Loader=yaml.FullLoader)
 
         return
 
