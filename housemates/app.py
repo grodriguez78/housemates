@@ -7,18 +7,14 @@ import json
 from splitwise import Splitwise
 
 from .keychain import Keychain
+from .google import GoogleHandler
 
-import pickle
-import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
 
 host_name = "localhost"
 server_port = 6969
 
 
-class postCounter(object):
+class PostCounter(object):
 
     def __init__(self):
         self.num_posts = 0
@@ -29,8 +25,9 @@ class postCounter(object):
 
 class Housemates(BaseHTTPRequestHandler):
 
-    counter = postCounter()
+    counter = PostCounter()
     keychain = Keychain()
+    google_handler = GoogleHandler()
 
     homepage = "http://{}:{}".format(host_name, server_port)
 
@@ -127,7 +124,11 @@ class Housemates(BaseHTTPRequestHandler):
 
 
     def do_POST(self):
-        """ To run authentication, make a POST request to http://{homepage}/execute/authentication
+        """ To run authentication, make a POST request to http://{homepage}/execute/{workflow}
+
+        Valid workflows:
+            - authentication
+            - scan
 
         """
 
@@ -160,48 +161,14 @@ class Housemates(BaseHTTPRequestHandler):
 
         # Run authentication workflows
         if workflow == "authentication":
-            self.google_auth()
-            self.request_splitwise_auth()
+            self.google_handler.authenticate({"gmail": "readonly"})
+            #self.request_splitwise_auth()
+
+        elif workflow == "scan":
+            new_bills = self.google_handler.scan_emails()
+            print("Found {} New Bills!".format(len(new_bills)))
+            for i, bill in enumerate(new_bills):
+                print("Bill {}: ${} due to {}".format(i + 1, bill.total, bill.sender))
 
         return
-
-    def google_auth(self, scopes=['https://www.googleapis.com/auth/gmail.readonly']):
-        """ Authenticate Google API
-
-        """
-        import pdb; pdb.set_trace()
-        creds = None
-
-        # The file token.pickle stores the user's access and refresh tokens, and is
-        # created automatically when the authorization flow completes for the first time.
-        if os.path.exists('.credentials/google_token.pickle'):
-            with open('.credentials/google_token.pickle', 'rb') as token:
-                creds = pickle.load(token)
-
-        # If there are no (valid) credentials available, let the user log in.
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    '.credentials/google.json', scopes)
-                creds = flow.run_local_server(port=0)
-            # Save the credentials for the next run
-            with open('.credentials/google_token.pickle', 'wb') as token:
-                pickle.dump(creds, token)
-
-
-        # Check that gmail client works
-        import pdb; pdb.set_trace()
-        gm_client = build('gmail', 'v1', credentials=creds)
-
-        # Get unread messages in the Bills/38 Mountview Court label
-        foo = gm_client.users().messages().list(userId='me', labelIds=['Label_8761640109747395119', 'UNREAD']).execute()
-
-
-        return
-
-## TODO: Gmail Handler to extract unread bills
-
-
 

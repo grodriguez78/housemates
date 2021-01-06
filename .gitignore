@@ -94,6 +94,9 @@ ENV/
 # Confidential
 credentials.*
 
+# Configuration
+config/
+
 # Javascript
 node_modules/
 .config.json
