@@ -10,7 +10,7 @@ def test_app(capsys, example_fixture):
     host_name = "localhost"
     server_port = 8000
 
-    web_server = HTTPServer((host_name, server_port), housemates.Housemates) # noqa: F841
+    web_server = HTTPServer((host_name, server_port), housemates.Housemates)    # noqa: F841
     print("Test server started http://{}:{}".format(host_name, server_port))
 
     # TODO: Run test server

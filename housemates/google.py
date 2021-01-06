@@ -90,11 +90,11 @@ class GoogleHandler():
         # Get Labe IDs used to denote unpaid Bills
         all_labels = client.users().labels().list(userId='me').execute()['labels']
         bill_labels = list(filter(lambda label: label['name'] in self.config['filter_label_names'], all_labels))
-        bill_labelids = [l['id'] for l in bill_labels]
+        bill_labelids = [label['id'] for label in bill_labels]
 
         # Get Bill Messages
         bill_msgs = client.users().messages().list(userId='me', labelIds=bill_labelids).execute()['messages']
-        bill_msg_ids = [b['id'] for b in bill_msgs]
+        bill_msg_ids = [msg['id'] for msg in bill_msgs]
 
         bills = []
         for bill_id in bill_msg_ids:

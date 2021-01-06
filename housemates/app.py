@@ -152,7 +152,7 @@ class Housemates(BaseHTTPRequestHandler):
         # Run authentication workflows
         if workflow == "authentication":
             self.google_handler.authenticate({"gmail": "readonly"})
-            #self.request_splitwise_auth()
+            # self.request_splitwise_auth()
 
         elif workflow == "scan":
             new_bills = self.google_handler.scan_emails()
